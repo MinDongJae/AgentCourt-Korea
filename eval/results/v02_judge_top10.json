@@ -1,0 +1,481 @@
+{
+  "version": "v0.2 (서술형 사건 → 죄종 메타 매칭)",
+  "mode": "vector",
+  "persona": "judge",
+  "top_k": 10,
+  "n_questions": 20,
+  "hit_at_10": 0.8,
+  "mrr": 0.484,
+  "per_question": [
+    {
+      "id": "q01",
+      "query_excerpt": "의뢰인이 인터넷 중고거래 사이트에서 가짜 명품을 진품이라 속여 다섯 명에게 판매한 사건. 피해 합계 5천만 ",
+      "expected_categories": [
+        "사기"
+      ],
+      "first_hit_rank": null,
+      "matched_categories_in_top_k": [],
+      "top_k_categories": [
+        "조세",
+        "조세",
+        "석유사업법위반",
+        "조세",
+        "금융",
+        "배임",
+        "조세",
+        "배임",
+        "변호사법위반",
+        "식품"
+      ]
+    },
+    {
+      "id": "q02",
+      "query_excerpt": "회식 후 대리운전을 부르려다 200미터 직접 운전한 의뢰인이 단속에 걸림. 혈중알코올 0.087%, 사고 없",
+      "expected_categories": [
+        "교통"
+      ],
+      "first_hit_rank": 1,
+      "matched_categories_in_top_k": [
+        "교통"
+      ],
+      "top_k_categories": [
+        "교통",
+        "교통",
+        "교통",
+        "교통",
+        "교통",
+        "교통",
+        "교통",
+        "스토킹",
+        "권리행사방해",
+        "살인"
+      ]
+    },
+    {
+      "id": "q03",
+      "query_excerpt": "회사에서 5년간 회계 담당으로 일하며 매월 소액씩 총 2억 원을 빼돌린 의뢰인. 뒤늦게 자백했고 일부 반환했",
+      "expected_categories": [
+        "횡령",
+        "배임"
+      ],
+      "first_hit_rank": 2,
+      "matched_categories_in_top_k": [
+        "횡령",
+        "배임"
+      ],
+      "top_k_categories": [
+        "금융",
+        "배임",
+        "조세",
+        "조세",
+        "횡령",
+        "배임",
+        "금융",
+        "금융",
+        "조세",
+        "변호사법위반"
+      ]
+    },
+    {
+      "id": "q04",
+      "query_excerpt": "전 여자친구에게 헤어진 후 3개월간 매일 메시지를 보내고 집 앞에 찾아간 의뢰인. 협박 문구는 없었음.",
+      "expected_categories": [
+        "스토킹"
+      ],
+      "first_hit_rank": 6,
+      "matched_categories_in_top_k": [
+        "스토킹"
+      ],
+      "top_k_categories": [
+        "채권추심법위반",
+        "성매매",
+        "금융",
+        "배임",
+        "협박",
+        "스토킹",
+        "변호사법위반",
+        "금융",
+        "스토킹",
+        "변호사법위반"
+      ]
+    },
+    {
+      "id": "q05",
+      "query_excerpt": "10대 청소년이 다른 청소년의 음란 사진을 SNS 단톡방에 유포한 사건. 피해자 학교 동급생, 피해자가 정신",
+      "expected_categories": [
+        "성범죄",
+        "성폭력"
+      ],
+      "first_hit_rank": 3,
+      "matched_categories_in_top_k": [
+        "디지털 성범죄",
+        "성매매"
+      ],
+      "top_k_categories": [
+        "폭력",
+        "협박",
+        "디지털 성범죄",
+        "협박",
+        "협박",
+        "성매매",
+        "협박",
+        "주거침입",
+        "성매매",
+        "폭력"
+      ]
+    },
+    {
+      "id": "q06",
+      "query_excerpt": "택시 기사가 손님과 요금 다툼 중 손님의 멱살을 잡고 흔들어 전치 3주 진단을 받게 한 사건. 피해자가 합의",
+      "expected_categories": [
+        "폭력",
+        "협박"
+      ],
+      "first_hit_rank": null,
+      "matched_categories_in_top_k": [],
+      "top_k_categories": [
+        "교통",
+        "식품",
+        "교통",
+        "교통",
+        "변호사법위반",
+        "선거",
+        "교통",
+        "교통",
+        "교통",
+        "금융"
+      ]
+    },
+    {
+      "id": "q07",
+      "query_excerpt": "필로폰을 친구에게서 한 번 받아 투약한 의뢰인이 자수함. 마약 전과 없음.",
+      "expected_categories": [
+        "마약"
+      ],
+      "first_hit_rank": 1,
+      "matched_categories_in_top_k": [
+        "마약"
+      ],
+      "top_k_categories": [
+        "마약",
+        "마약",
+        "마약",
+        "마약",
+        "마약",
+        "마약",
+        "마약",
+        "마약",
+        "강도",
+        "마약"
+      ]
+    },
+    {
+      "id": "q08",
+      "query_excerpt": "음식점 주인이 옆 가게 주인과 자리 다툼 끝에 영업방해를 하자며 매장 앞에서 큰 소리로 욕설을 반복한 사건.",
+      "expected_categories": [
+        "폭력",
+        "협박",
+        "공무집행방해"
+      ],
+      "first_hit_rank": 1,
+      "matched_categories_in_top_k": [
+        "협박",
+        "공무집행방해"
+      ],
+      "top_k_categories": [
+        "협박",
+        "업무방해",
+        "업무방해",
+        "변호사법위반",
+        "금융",
+        "변호사법위반",
+        "공무집행방해",
+        "사행성",
+        "증권",
+        "권리행사방해"
+      ]
+    },
+    {
+      "id": "q09",
+      "query_excerpt": "공무원이 사업자로부터 1천만 원이 든 봉투를 받았으나 직무와 직접 관련 없다고 주장. 봉투는 즉시 반환 안 ",
+      "expected_categories": [
+        "뇌물"
+      ],
+      "first_hit_rank": 6,
+      "matched_categories_in_top_k": [
+        "뇌물"
+      ],
+      "top_k_categories": [
+        "협박",
+        "금융",
+        "배임",
+        "배임",
+        "변호사법위반",
+        "뇌물",
+        "사기",
+        "관세",
+        "공문서",
+        "변호사법위반"
+      ]
+    },
+    {
+      "id": "q10",
+      "query_excerpt": "보이스피싱 조직의 인출책 역할로 1회 100만 원을 인출해 전달한 학생. 자백, 가담 정도 미미.",
+      "expected_categories": [
+        "사기"
+      ],
+      "first_hit_rank": null,
+      "matched_categories_in_top_k": [],
+      "top_k_categories": [
+        "배임",
+        "선거",
+        "배임",
+        "금융",
+        "약취",
+        "선거",
+        "장물",
+        "배임",
+        "뇌물",
+        "뇌물"
+      ]
+    },
+    {
+      "id": "q11",
+      "query_excerpt": "법정에서 친구를 위해 거짓 진술을 한 의뢰인. 위증으로 기소됨.",
+      "expected_categories": [
+        "위증"
+      ],
+      "first_hit_rank": 1,
+      "matched_categories_in_top_k": [
+        "위증"
+      ],
+      "top_k_categories": [
+        "위증",
+        "위증",
+        "변호사법위반",
+        "증거인멸",
+        "위증",
+        "위증",
+        "공문서",
+        "사문서",
+        "명예훼손",
+        "배임"
+      ]
+    },
+    {
+      "id": "q12",
+      "query_excerpt": "PC방에서 옆자리 손님과 시비가 붙어 깨진 맥주병으로 위협한 사건. 부상은 없음.",
+      "expected_categories": [
+        "폭력",
+        "협박"
+      ],
+      "first_hit_rank": 4,
+      "matched_categories_in_top_k": [
+        "폭력"
+      ],
+      "top_k_categories": [
+        "업무방해",
+        "공무집행방해",
+        "공무집행방해",
+        "폭력",
+        "업무방해",
+        "명예훼손",
+        "공무집행방해",
+        "보건",
+        "방화",
+        "손괴"
+      ]
+    },
+    {
+      "id": "q13",
+      "query_excerpt": "친구 집에 놀러 갔다가 친구가 잠든 사이 노트북을 가지고 나온 의뢰인. 피해 변제, 친구가 처벌 원치 않음.",
+      "expected_categories": [
+        "절도"
+      ],
+      "first_hit_rank": null,
+      "matched_categories_in_top_k": [],
+      "top_k_categories": [
+        "도주",
+        "위증",
+        "관세",
+        "증권",
+        "폭력",
+        "도주",
+        "주거침입",
+        "도주",
+        "손괴",
+        "협박"
+      ]
+    },
+    {
+      "id": "q14",
+      "query_excerpt": "친부가 7세 자녀에게 1년간 상습적으로 손찌검을 한 사건. 자녀의 진단서 전치 2주 다수.",
+      "expected_categories": [
+        "폭력",
+        "협박"
+      ],
+      "first_hit_rank": 2,
+      "matched_categories_in_top_k": [
+        "공갈",
+        "폭력"
+      ],
+      "top_k_categories": [
+        "식품",
+        "폭력",
+        "체포",
+        "주거침입",
+        "체포",
+        "공갈",
+        "주거침입",
+        "식품",
+        "성범죄",
+        "체포"
+      ]
+    },
+    {
+      "id": "q15",
+      "query_excerpt": "회사 자금 30억을 단기간 횡령한 후 도박으로 탕진한 의뢰인. 변제 전무.",
+      "expected_categories": [
+        "횡령",
+        "배임"
+      ],
+      "first_hit_rank": 3,
+      "matched_categories_in_top_k": [
+        "횡령",
+        "배임"
+      ],
+      "top_k_categories": [
+        "금융",
+        "사행성",
+        "배임",
+        "조세",
+        "횡령",
+        "대부업법",
+        "증권",
+        "사행성",
+        "조세",
+        "증권"
+      ]
+    },
+    {
+      "id": "q16",
+      "query_excerpt": "외국인 노동자 다섯 명을 자취방에 거주시키며 임금을 체불한 사장. 출입국법 위반 추가 의심.",
+      "expected_categories": [
+        "근로기준법위반"
+      ],
+      "first_hit_rank": 3,
+      "matched_categories_in_top_k": [
+        "근로기준법위반",
+        "조세"
+      ],
+      "top_k_categories": [
+        "협박",
+        "협박",
+        "근로기준법위반",
+        "조세",
+        "금융",
+        "마약",
+        "대부업법",
+        "증권",
+        "도주",
+        "인신매매"
+      ]
+    },
+    {
+      "id": "q17",
+      "query_excerpt": "운전 중 보행자를 치어 사망케 한 후 신고하지 않고 도주한 의뢰인. 음주 미상.",
+      "expected_categories": [
+        "교통"
+      ],
+      "first_hit_rank": 1,
+      "matched_categories_in_top_k": [
+        "교통"
+      ],
+      "top_k_categories": [
+        "교통",
+        "교통",
+        "교통",
+        "교통",
+        "교통",
+        "교통",
+        "교통",
+        "살인",
+        "손괴",
+        "교통"
+      ]
+    },
+    {
+      "id": "q18",
+      "query_excerpt": "온라인 도박 사이트를 운영해 6개월간 회원 300명으로부터 5억 원 수익을 올린 의뢰인.",
+      "expected_categories": [
+        "사행성",
+        "게임물"
+      ],
+      "first_hit_rank": 1,
+      "matched_categories_in_top_k": [
+        "사행성"
+      ],
+      "top_k_categories": [
+        "사행성",
+        "사행성",
+        "사행성",
+        "사행성",
+        "대부업법",
+        "사행성",
+        "조세",
+        "사행성",
+        "사행성",
+        "금융"
+      ]
+    },
+    {
+      "id": "q19",
+      "query_excerpt": "원룸에 침입해 거주자를 묶고 현금 200만원과 휴대폰을 빼앗은 의뢰인. 단독 범행, 흉기 미사용.",
+      "expected_categories": [
+        "강도",
+        "주거침입"
+      ],
+      "first_hit_rank": 1,
+      "matched_categories_in_top_k": [
+        "절도",
+        "주거침입"
+      ],
+      "top_k_categories": [
+        "절도",
+        "주거침입",
+        "주거침입",
+        "주거침입",
+        "스토킹",
+        "절도",
+        "주거침입",
+        "대부업법",
+        "도주",
+        "주거침입"
+      ]
+    },
+    {
+      "id": "q20",
+      "query_excerpt": "지인에게 자기 아이디를 빌려줘 그 지인이 보이스피싱 자금 세탁에 활용한 사건. 의뢰인은 자금 세탁임을 몰랐다",
+      "expected_categories": [
+        "전자금융거래법위반",
+        "사기"
+      ],
+      "first_hit_rank": 10,
+      "matched_categories_in_top_k": [
+        "전자금융거래법위반"
+      ],
+      "top_k_categories": [
+        "금융",
+        "금융",
+        "변호사법위반",
+        "증권",
+        "배임",
+        "금융",
+        "증권",
+        "변호사법위반",
+        "금융",
+        "전자금융거래법위반"
+      ]
+    }
+  ]
+}

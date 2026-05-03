@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>양형기준 검색 어시스턴트 — 변호사 보조 RAG</title>
+<meta name="description" content="대법원 양형기준 909페이지 + 법제처 OPEN API를 RAG로 검색하는 변호사 보조 도구.">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sun-typeface/SUIT@2/fonts/variable/woff2/SUIT-Variable.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header class="header">
+  <div class="brand">
+    <span class="brand-text">양형기준 검색 어시스턴트</span>
+    <span class="brand-tag">Beta</span>
+  </div>
+  <div class="health-bar" id="health-bar">
+    <div class="health-item"><span class="health-dot"></span><span id="health-retriever">retriever 로딩</span></div>
+    <div class="health-item"><span class="health-dot"></span><span id="health-llm">llm 확인</span></div>
+    <div class="health-item"><span class="health-dot"></span><span id="health-law">법제처 확인</span></div>
+  </div>
+</header>
+
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="card">
+      <h3 class="card-title">예시 사건</h3>
+      <div class="sample-list" id="sample-list"></div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">범위 한정</h3>
+      <div style="font-size:11.5px;color:var(--ink-soft);line-height:1.65">
+        본 도구는 형량을 예측하거나 추천하지 않습니다.
+        대법원 양형기준 909p의 조문 검색 + 법제처 판례 매칭만 수행합니다.
+        최종 양형 판단은 판사의 권한입니다.
+        <br><br>
+        ProPublica 2016 COMPAS 보도(흑인 피고 +77% 위험 분류 편향) 이후 형사 AI에 요구되는
+        설명가능성·범위 한정 원칙을 반영했습니다.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 class="card-title">데이터 출처</h3>
+      <div style="font-size:11.5px;color:var(--ink-soft);line-height:1.65">
+        대법원 양형위원회 양형기준 2025판 (공공저작물)<br>
+        법제처 국가법령정보 OPEN API (공공누리 1유형)
+        <div style="font-family:var(--font-mono);color:var(--ink-muted);font-size:10.5px;margin-top:4px">법령 · 판례 · 자치법규 · 행정규칙</div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <section class="hero">
+      <h1 class="hero-title">양형기준 검색 어시스턴트</h1>
+      <p class="hero-sub">
+        대법원 양형기준 2025판과 법제처 판례 OPEN API를 RAG로 인덱싱한 변호사 보조 도구입니다.
+        사건 키워드를 입력하면 검사·변호인·판사 시점에서 관련 조문과 판례를 매칭합니다.
+        형량을 예측하지 않습니다.
+      </p>
+
+      <div class="hero-stats">
+        <div class="stat"><div class="stat-label">양형기준 PDF</div><div class="stat-value">909<span style="font-size:13px;color:var(--ink-muted)">p</span></div><div class="stat-sub">대법원 2025판 / 901 청크</div></div>
+        <div class="stat"><div class="stat-label">청크 인덱싱</div><div class="stat-value">FAISS</div><div class="stat-sub">text-embedding-3-large</div></div>
+        <div class="stat"><div class="stat-label">법제처 OPEN API</div><div class="stat-value">실시간</div><div class="stat-sub">법령·판례·자치법규</div></div>
+        <div class="stat"><div class="stat-label">평가 Hit@10</div><div class="stat-value">0.80</div><div class="stat-sub">서술형 사건 20문항 (Hit@5=0.65, MRR=0.46)</div></div>
+      </div>
+    </section>
+
+    <section class="search-card">
+      <div class="search-label">사건 개요</div>
+      <textarea class="search-input" id="case-input" placeholder="예) 사기죄 피해액 5천만원 초범 변제 합의 안 됨 부양가족 1인"></textarea>
+      <div class="search-meta">
+        <button class="btn btn-primary" id="analyze-btn">양형기준 검색</button>
+        <span class="kbd-hint"><span class="kbd">Ctrl</span> + <span class="kbd">Enter</span></span>
+        <span style="margin-left:auto;font-size:11px;color:var(--ink-muted)" id="search-status"></span>
+      </div>
+    </section>
+
+    <section class="results" id="results"></section>
+
+  </main>
+
+</div>
+
+<footer class="footer">
+  <div>
+    Apache 2.0. 출처 표시 + NOTICE 동봉. 형사 양형 판단은 판사의 권한이며 본 도구는 변호사 보조 검색용입니다.
+  </div>
+  <div style="margin-top:6px">
+    <a href="/api/health" target="_blank">/api/health</a>
+    <span style="margin:0 6px">·</span>
+    <a href="https://open.law.go.kr" target="_blank">법제처 OPEN API</a>
+    <span style="margin:0 6px">·</span>
+    <a href="https://sc.scourt.go.kr" target="_blank">대법원 양형위원회</a>
+  </div>
+</footer>
+
+<script src="/static/app.js"></script>
+
+</body>
+</html>

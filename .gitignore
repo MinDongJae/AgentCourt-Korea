@@ -1,0 +1,46 @@
+# Secrets
+.env
+.env.*
+!.env.example
+*.key
+credentials*.json
+secrets/
+
+# Data (대용량, 사용자가 직접 수집)
+data/
+!data/.gitkeep
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.venv/
+venv/
+.pytest_cache/
+
+# IDE
+.idea/
+.vscode/
+.DS_Store
+
+# Logs
+*.log
+*.txt
+!requirements*.txt
+!*.template.txt
+
+# Build
+dist/
+build/
+*.egg-info/
+
+# Docker / AWS
+.aws/
+.docker/
+
+# 임시
+_gabia_work/
+mcp_law_external/
+*_result.txt
+*_backup*
