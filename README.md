@@ -1,5 +1,7 @@
 # AgentCourt-Korea
 
+![Cover](docs/cover.png)
+
 > **Multi-agent court simulation for Korean criminal sentencing**
 > Inspired by AgentsBench (MDPI Systems 2025) + AgentCourt (arXiv 2408.08089) + AgentsCourt (EMNLP 2024 Findings).
 
@@ -11,6 +13,197 @@
 
 대법원 양형위원회 양형기준 + 법제처 OPEN API 형사 판례 + 양형위 회의자료를 통합한
 **다중 에이전트 양형 의사결정 시뮬레이션 시스템**.
+
+---
+
+## 📊 데이터 파이프라인
+
+```mermaid
+flowchart TB
+    subgraph 수집["📥 데이터 수집"]
+        A1["대법원 양형위원회<br/>50개 PDF · 29MB"]
+        A2["법제처 OPEN API<br/>28죄종 전수 수집"]
+        A3["양형위 회의자료<br/>44개 PDF · 221MB"]
+    end
+
+    subgraph 처리["⚙️ 청크 변환"]
+        B1["pypdf 파서<br/>1,797 chunks"]
+        B2["메타 직렬화<br/>29,124 chunks"]
+        B3["pymupdf 파서<br/>7,423 chunks"]
+    end
+
+    subgraph 인덱싱["🧠 임베딩 + FAISS"]
+        C1["text-embedding-3-large<br/>3072차원"]
+        C2["FAISS IndexFlatIP<br/>449MB · 코사인 유사도"]
+    end
+
+    subgraph 검색["🔍 페르소나별 검색"]
+        D1["검사 — 가중요소"]
+        D2["변호인 — 감경요소"]
+        D3["판사 — 종합"]
+    end
+
+    A1 --> B1
+    A2 --> B2
+    A3 --> B3
+    B1 & B2 & B3 --> M["통합 chunks<br/>38,344개"]
+    M --> C1 --> C2
+    C2 --> D1 & D2 & D3
+
+    style M fill:#2563eb,stroke:#1e40af,color:#fff
+    style C2 fill:#10b981,stroke:#047857,color:#fff
+```
+
+---
+
+## ⚖️ AgentsBench 4단계 시뮬레이션
+
+![4 Stages](docs/agentsbench_4stage.png)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant U as 사용자
+    participant API as /api/bench
+    participant P as 검사 Agent
+    participant D as 변호인 Agent
+    participant J as 판사 Agent
+    participant B as 양형위 7명
+
+    U->>API: 사건 개요 입력
+
+    rect rgb(239, 246, 255)
+    Note over P,J: Stage 1 — 독립 분석 (병렬, ~8초)
+    par
+        API->>P: 가중요소 chunk + 사건
+        P-->>API: 가중요소 후보 + 체크리스트
+    and
+        API->>D: 감경요소 chunk + 사건
+        D-->>API: 감경요소 후보 + 체크리스트
+    end
+    end
+
+    rect rgb(254, 242, 242)
+    Note over P,J: Stage 2 — 토론 3턴 (~12초)
+    P->>D: Turn 1: 가중요소 주장
+    D->>P: Turn 1: 감경요소 주장
+    P->>D: Turn 2: 변호인 주장 반박
+    D->>P: Turn 2: 검사 주장 반박
+    API->>J: Turn 3: 양측 주장 + 양형기준
+    J-->>API: 인정 인자 + 권고 영역
+    end
+
+    rect rgb(245, 243, 255)
+    Note over J: Stage 3 — 최종 양형 (~5초)
+    API->>J: 토론 종합
+    J-->>API: 권고형량 범위 + 인자 가중치
+    end
+
+    rect rgb(240, 253, 244)
+    Note over B: Stage 4 — 양형위 7명 합의 (선택, ~30초)
+    par 7명 병렬 호출
+        API->>B: 전문/비전문 판사 7명
+        B-->>API: 각자 권고 영역 + 형량
+    end
+    Note over API: 형량 분포 도출
+    end
+
+    API-->>U: 통합 결과 + 신뢰구간
+```
+
+---
+
+## 🏛 시스템 아키텍처
+
+```mermaid
+flowchart LR
+    User(["👤 사용자<br/>변호사·국선변호인"])
+    Gabia["🌐 가비아 DNS<br/>sentencing.aptbaechi.com"]
+    CF["☁️ CloudFront<br/>+ ACM us-east-1"]
+    S3["📦 S3<br/>frontend"]
+    APIGW["🚪 API Gateway<br/>HTTP API"]
+
+    subgraph Lambda4GB["λ Lambda 4GB Container"]
+        FastAPI["FastAPI + Mangum"]
+        FAISS["📚 FAISS<br/>38,344 chunks<br/>(449MB in RAM)"]
+        Mods["multi_persona<br/>agents_bench<br/>citation_verify"]
+    end
+
+    Anthropic["🤖 Anthropic<br/>Haiku 4.5 → Sonnet 4.6 → Opus 4.7"]
+    LawAPI["⚖️ 법제처 OPEN API<br/>open.law.go.kr"]
+
+    User --> Gabia --> CF
+    CF -- "/*" --> S3
+    CF -- "/api/*" --> APIGW
+    APIGW --> FastAPI
+    FastAPI --> Mods
+    Mods --> FAISS
+    Mods --> Anthropic
+    Mods --> LawAPI
+
+    style Lambda4GB fill:#fef3c7,stroke:#f59e0b,color:#000
+    style FAISS fill:#10b981,stroke:#047857,color:#fff
+    style Anthropic fill:#7c3aed,stroke:#5b21b6,color:#fff
+    style LawAPI fill:#2563eb,stroke:#1e40af,color:#fff
+```
+
+---
+
+## ⏱ 요청 흐름 (POST /api/analyze, ~25초)
+
+```mermaid
+sequenceDiagram
+    participant U as 사용자
+    participant CF as CloudFront
+    participant L as Lambda
+    participant E as OpenAI Embed
+    participant F as FAISS
+    participant A as Anthropic Haiku
+    participant Law as 법제처 API
+
+    U->>CF: POST /api/analyze {description}
+    CF->>L: forward
+    L->>E: embed(query)
+    E-->>L: 3072d 벡터
+    L->>F: search 페르소나×3 × top_k=5
+    F-->>L: 15 chunks (가중·감경·종합)
+
+    par 검사·변호인 병렬 (Stage 1)
+        L->>A: 검사 prompt + 가중 chunks
+        A-->>L: 가중요소 분석
+    and
+        L->>A: 변호인 prompt + 감경 chunks
+        A-->>L: 감경요소 분석
+    end
+
+    L->>A: 판사 prompt + 종합 chunks
+    A-->>L: 권고형량 + 인자 가중치
+
+    L->>Law: search_precedent(키워드)
+    Law-->>L: 판례 10건 (1·2심 우선 정렬)
+
+    L-->>CF: JSON 응답 (~18KB)
+    CF-->>U: 200 OK (~25s)
+```
+
+---
+
+## 📈 데이터 분포 (실측)
+
+```mermaid
+pie title 38,344 chunks 출처별 분포
+    "법제처 형사 판례 (28죄종)" : 29124
+    "양형위 회의자료 (44 PDF)" : 7423
+    "양형기준 PDF (50종)" : 1797
+```
+
+```mermaid
+pie title 형사 판례 29,124건 심급 분포 (실측)
+    "3심 (대법원)" : 10782
+    "기타" : 10525
+    "1심 (지방법원)" : 4201
+    "2심 (고등법원)" : 3616
+```
 
 ---
 
