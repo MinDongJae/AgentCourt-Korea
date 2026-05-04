@@ -94,19 +94,16 @@ a { color: var(--clay-coral); text-decoration: none; }
 .hero {
   position: relative;
   text-align: center;
-  padding: 80px 24px 60px;
-  background:
-    radial-gradient(ellipse 600px 400px at 15% 20%, var(--clay-pink), transparent 60%),
-    radial-gradient(ellipse 600px 400px at 85% 30%, var(--clay-cream), transparent 60%),
-    radial-gradient(ellipse 600px 400px at 50% 80%, var(--clay-mint), transparent 60%),
-    var(--bg);
+  padding: 80px 24px 32px;
+  /* Claybees 정확 추출 — 단순 4색 135deg linear */
+  background: linear-gradient(135deg, #FDE2FF 0%, #E0F7FA 33%, #FFF5E1 66%, #E6F3FF 100%);
   overflow: hidden;
 }
 
 .hero-h1 {
-  font-size: 56px;
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -0.025em;
   line-height: 1.15;
   margin: 0 0 20px;
   color: var(--ink);
@@ -122,20 +119,20 @@ a { color: var(--clay-coral); text-decoration: none; }
   line-height: 1.7;
 }
 
+/* Claybees 검색바 — pill input + 우측 노란 사각 버튼 (16px round only on right) */
 .search-box {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: stretch;
   max-width: 580px;
   margin: 0 auto;
-  background: white;
-  border-radius: var(--r-pill);
-  padding: 6px 6px 6px 24px;
   box-shadow: var(--shadow);
+  border-radius: 16px;
+  overflow: hidden;
+  background: white;
   transition: box-shadow 0.2s;
 }
 .search-box:focus-within {
-  box-shadow: 0 0 0 4px rgba(208,58,90,0.12), var(--shadow);
+  box-shadow: 0 0 0 4px rgba(251,194,82,0.20), var(--shadow);
 }
 
 .search-input {
@@ -143,17 +140,16 @@ a { color: var(--clay-coral); text-decoration: none; }
   border: none;
   outline: none;
   font-family: inherit;
-  font-size: 16px;
+  font-size: 15px;
   background: transparent;
   color: var(--ink);
-  padding: 12px 0;
+  padding: 16px 20px;
 }
 .search-input::placeholder { color: var(--ink-muted); }
 
 .search-btn {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
+  width: 64px;
+  border-radius: 0 16px 16px 0;
   background: var(--clay-orange);
   border: none;
   cursor: pointer;
@@ -162,10 +158,7 @@ a { color: var(--clay-coral); text-decoration: none; }
   justify-content: center;
   transition: all 0.15s;
 }
-.search-btn:hover {
-  background: #F0B23E;
-  transform: scale(1.05);
-}
+.search-btn:hover { background: #F0B23E; }
 
 .search-meta {
   margin-top: 16px;
@@ -173,48 +166,26 @@ a { color: var(--clay-coral); text-decoration: none; }
   color: var(--ink-muted);
 }
 
-/* hero clay illustrations */
-.hero-clay {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
+/* hero scene — Claybees scene illustration single centered */
+.hero-scene {
+  margin: 32px auto 0;
+  max-width: 320px;
 }
-.clay-hero {
-  position: absolute;
-  filter: drop-shadow(0 12px 24px rgba(17,24,39,0.10));
+.hero-scene-img {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 16px 32px rgba(17,24,39,0.10));
+  animation: bob 4s ease-in-out infinite;
 }
-.clay-hero-1 {
-  top: 80px; left: 6%; width: 110px; height: 110px;
-  animation: float-a 5s ease-in-out infinite;
-}
-.clay-hero-2 {
-  top: 60px; right: 8%; width: 130px; height: 130px;
-  animation: float-b 5.5s ease-in-out infinite;
-}
-.clay-hero-3 {
-  bottom: 60px; left: 10%; width: 100px; height: 100px;
-  animation: float-c 4.8s ease-in-out infinite;
-}
-.clay-hero-4 {
-  bottom: 80px; right: 12%; width: 90px; height: 90px;
-  animation: float-d 4s ease-in-out infinite;
-}
-@keyframes float-a { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-@keyframes float-b { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
-@keyframes float-c { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
-@keyframes float-d { 0%,100%{transform:translateY(0) rotate(0)} 50%{transform:translateY(-6px) rotate(3deg)} }
-
-.hero > h1, .hero > p, .hero > .search-box, .hero > .search-meta {
-  position: relative;
-  z-index: 1;
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
 }
 
 @media (max-width: 720px) {
-  .hero-h1 { font-size: 36px; }
-  .hero { padding: 56px 20px 40px; }
-  .clay-hero-1, .clay-hero-3 { display: none; }
-  .clay-hero-2, .clay-hero-4 { width: 70px; height: 70px; }
+  .hero-h1 { font-size: 32px; }
+  .hero { padding: 48px 20px 24px; }
+  .hero-scene { max-width: 240px; }
 }
 
 /* ── Sections ── */
