@@ -61,7 +61,16 @@ async function loadSamples() {
 
 function renderPersona(persona, label, tag, tagClass, data) {
   if (!data) return '';
+  const clayMap = {
+    coral: '/static/agent_prosecutor.png?v=2',
+    primary: '/static/agent_defender.png?v=2',
+    purple: '/static/agent_judge.png?v=2',
+  };
+  const clayImg = clayMap[persona] || '';
   let html = `<div class="persona-card ${persona}">`;
+  if (clayImg) {
+    html += `<img class="persona-clay" src="${clayImg}" alt="${tag}" loading="lazy">`;
+  }
   html += `<div class="persona-head">`;
   html += `<div class="persona-title"><span>${label}</span><span class="persona-tag ${tagClass}">${tag}</span></div>`;
   html += `<div class="persona-meta">${escapeHtml(data._model_used || data._mode || '?')}</div>`;

@@ -3,118 +3,130 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>AgentCourt-Korea — 다중 에이전트 양형 시뮬레이션</title>
-<meta name="description" content="대법원 양형기준 + 법제처 OPEN API + 양형위 회의자료를 다중 에이전트로 시뮬레이션하는 변호사 보조 도구">
+<title>AgentCourt-Korea</title>
+<meta name="description" content="대법원 양형기준·법제처 판례·양형위 회의자료를 통합 검색하는 변호사 보조 도구">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Pretendard+Variable:wght@400;500;600;700&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
 
-<header class="header">
-  <div class="brand">
-    <span class="brand-text">AgentCourt-Korea</span>
-    <span class="brand-tag">Beta</span>
+<header class="navbar">
+  <div class="nav-brand">
+    <img src="/static/agent_judge.png?v=2" alt="" class="nav-logo">
+    <span>AgentCourt</span>
   </div>
-  <div class="health-bar" id="health-bar">
-    <div class="health-item"><span class="health-dot"></span><span id="health-retriever">retriever</span></div>
-    <div class="health-item"><span class="health-dot"></span><span id="health-llm">llm</span></div>
-    <div class="health-item"><span class="health-dot"></span><span id="health-law">법제처</span></div>
-  </div>
+  <nav class="nav-menu">
+    <a href="#search" class="nav-link nav-link-active">검색</a>
+    <a href="#how" class="nav-link">동작 방식</a>
+    <a href="#data" class="nav-link">데이터</a>
+    <a href="https://github.com/MinDongJae/AgentCourt-Korea" class="nav-link" target="_blank">GitHub</a>
+  </nav>
 </header>
 
-<div class="app">
+<main>
 
-  <aside class="sidebar">
-    <div class="card">
-      <h3 class="card-title">예시 사건</h3>
-      <div class="sample-list" id="sample-list"></div>
+  <section class="hero">
+    <h1 class="hero-h1">
+      <span class="hero-coral">양형기준</span>과 <span class="hero-orange">판례</span>를<br>한 번에 검색하세요
+    </h1>
+    <p class="hero-desc">
+      대법원 양형위원회 50개 PDF · 법제처 형사 판례 29,124건 · 양형위 회의자료 44개를<br>
+      검사 · 변호인 · 판사 시점에서 정리합니다.
+    </p>
+
+    <div class="search-box" id="search">
+      <input type="text" id="case-input" class="search-input" placeholder="사건 개요를 입력하세요" />
+      <button id="analyze-btn" class="search-btn" aria-label="검색">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M9 17A8 8 0 109 1a8 8 0 000 16zM19 19l-4-4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
     </div>
 
-    <div class="card">
-      <h3 class="card-title">시스템 한계</h3>
-      <div style="font-size:12.5px;color:var(--toss-gray-700);line-height:1.65">
-        본 도구는 형량을 예측하지 않습니다.
-        대법원 양형기준 + 법제처 판례 검색 + 페르소나별 체크리스트를 제공합니다.
-        최종 양형은 판사 재량입니다.
-      </div>
+    <div class="search-meta">
+      <span id="search-status">사건 키워드 또는 개요를 입력 후 Enter</span>
     </div>
 
-    <div class="card">
-      <h3 class="card-title">데이터 출처</h3>
-      <div style="font-size:12px;color:var(--toss-gray-700);line-height:1.7">
-        대법원 양형위원회 50개 PDF<br>
-        법제처 OPEN API 형사 판례 29,124건<br>
-        양형위 회의자료 44개 PDF<br>
-        Gemini 사전 요약 89건 + 연간보고서<br>
-        <span style="color:var(--toss-gray-500);font-size:11px">총 39,057 chunks</span>
+    <div class="hero-clay">
+      <img class="clay-hero clay-hero-1" src="/static/agent_prosecutor.png?v=2" alt="">
+      <img class="clay-hero clay-hero-2" src="/static/agent_judge.png?v=2" alt="">
+      <img class="clay-hero clay-hero-3" src="/static/agent_defender.png?v=2" alt="">
+      <img class="clay-hero clay-hero-4" src="/static/icon_scale.png?v=2" alt="">
+    </div>
+  </section>
+
+  <section class="samples-section">
+    <h2 class="section-title">예시 사건</h2>
+    <div class="sample-grid" id="sample-list"></div>
+  </section>
+
+  <section class="results" id="results"></section>
+
+  <section class="features-section" id="how">
+    <h2 class="section-title">동작 방식</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <img src="/static/icon_book.png" alt="" class="feature-icon">
+        <h3>다중 출처 검색</h3>
+        <p>양형기준 PDF 50개 + 법제처 판례 + 양형위 회의자료 통합 인덱스에서 관련 조문·판례를 추출합니다.</p>
+      </div>
+      <div class="feature-card">
+        <img src="/static/icon_gavel.png" alt="" class="feature-icon">
+        <h3>3-페르소나 분석</h3>
+        <p>검사 시점 가중요소, 변호인 시점 감경요소, 판사 시점 종합으로 양형 인자를 정리합니다.</p>
+      </div>
+      <div class="feature-card">
+        <img src="/static/icon_scale.png" alt="" class="feature-icon">
+        <h3>1·2심 우선 정렬</h3>
+        <p>일상범죄는 1심·2심에 양형 사례가 풍부합니다. 대법원 위주가 아닌 하급심 우선 노출.</p>
       </div>
     </div>
-  </aside>
+  </section>
 
-  <main class="main">
-
-    <section class="hero">
-      <span class="hero-badge">⚖️ AI 다중 에이전트 양형 시뮬레이션</span>
-      <h1 class="hero-title">변호사를 위한<br>양형기준 검색 어시스턴트</h1>
-      <p class="hero-sub">
-        대법원 양형기준 50개 PDF, 법제처 형사 판례 29,124건,
-        양형위원회 회의자료 44개 PDF를 다중 에이전트로 검색하고,
-        검사·변호인·판사 시점에서 가중·감경요소를 정리합니다.
-      </p>
-
-      <div class="hero-stats">
-        <div class="stat">
-          <div class="stat-label">청크 수</div>
-          <div class="stat-value">39,057</div>
-          <div class="stat-sub">FAISS · text-embedding-3-large</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">데이터 소스</div>
-          <div class="stat-value">94+</div>
-          <div class="stat-sub">PDF · 판례 · 회의자료</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">분석 시간</div>
-          <div class="stat-value">~25s</div>
-          <div class="stat-sub">3-페르소나 + 판례 매칭</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">양형위 자료</div>
-          <div class="stat-value">제144회</div>
-          <div class="stat-sub">최신 회의자료까지</div>
-        </div>
+  <section class="features-section" id="data">
+    <h2 class="section-title">데이터</h2>
+    <div class="data-grid">
+      <div class="data-card">
+        <div class="data-num">39,057</div>
+        <div class="data-label">청크 수</div>
       </div>
-    </section>
-
-    <section class="search-card">
-      <div class="search-label">사건 개요</div>
-      <textarea class="search-input" id="case-input" placeholder="예) 사기죄 피해액 5천만원 초범 변제 합의 안 됨 부양가족 1인"></textarea>
-      <div class="search-meta">
-        <button class="btn btn-primary" id="analyze-btn">양형기준 검색</button>
-        <span class="kbd-hint"><span class="kbd">Ctrl</span> + <span class="kbd">Enter</span></span>
-        <span style="margin-left:auto;font-size:12px;color:var(--toss-gray-500)" id="search-status"></span>
+      <div class="data-card">
+        <div class="data-num">94+</div>
+        <div class="data-label">PDF 문서</div>
       </div>
-    </section>
+      <div class="data-card">
+        <div class="data-num">29,124</div>
+        <div class="data-label">법제처 판례</div>
+      </div>
+      <div class="data-card">
+        <div class="data-num">144</div>
+        <div class="data-label">양형위 회의</div>
+      </div>
+    </div>
+  </section>
 
-    <section class="results" id="results"></section>
-
-  </main>
-
-</div>
+</main>
 
 <footer class="footer">
-  <div>
-    MIT License · 출처 표시 동봉.
-    형사 양형 판단은 판사 재량이며 본 도구는 변호사·국선변호인 보조 검색용입니다.
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand">AgentCourt-Korea</div>
+      <p class="footer-desc">변호사·국선변호인을 위한 양형기준 보조 검색</p>
+    </div>
+    <div>
+      <h4>출처</h4>
+      <a href="https://sc.scourt.go.kr" target="_blank">대법원 양형위원회</a>
+      <a href="https://open.law.go.kr" target="_blank">법제처 OPEN API</a>
+    </div>
+    <div>
+      <h4>링크</h4>
+      <a href="/api/health" target="_blank">/api/health</a>
+      <a href="https://github.com/MinDongJae/AgentCourt-Korea" target="_blank">GitHub</a>
+    </div>
   </div>
-  <div style="margin-top:8px">
-    <a href="/api/health" target="_blank">/api/health</a>
-    <span style="margin:0 8px;color:var(--toss-gray-300)">·</span>
-    <a href="https://github.com/MinDongJae/AgentCourt-Korea" target="_blank">GitHub</a>
-    <span style="margin:0 8px;color:var(--toss-gray-300)">·</span>
-    <a href="https://open.law.go.kr" target="_blank">법제처</a>
-    <span style="margin:0 8px;color:var(--toss-gray-300)">·</span>
-    <a href="https://sc.scourt.go.kr" target="_blank">대법원 양형위원회</a>
+  <div class="footer-bottom">
+    MIT License · 본 도구는 변호사 보조이며 형사 양형은 판사 재량입니다.
   </div>
 </footer>
 
