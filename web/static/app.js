@@ -191,9 +191,9 @@ async function analyze() {
     document.getElementById('search-status').textContent = `완료 — ${elapsed}초 / 모델: ${data.prosecutor && data.prosecutor._model_used || 'fallback'}`;
 
     let html = '<div class="persona-grid">';
-    html += renderPersona('prosecutor', '검사 시점', '가중요소', 'rose', data.prosecutor);
-    html += renderPersona('defender', '변호인 시점', '감경요소', 'primary', data.defender);
-    html += renderPersona('judge', '판사 시점 (종합)', '권고형량', 'violet', data.judge);
+    html += renderPersona('coral', '검사 시점', '가중요소', 'coral', data.prosecutor);
+    html += renderPersona('primary', '변호인 시점', '감경요소', 'primary', data.defender);
+    html += renderPersona('purple', '판사 시점 (종합)', '권고형량', 'purple', data.judge);
     html += '</div>';
     html += renderPrecedents(data.precedents);
     html += `<div class="disclaimer">${escapeHtml(data._disclaimer)}</div>`;
