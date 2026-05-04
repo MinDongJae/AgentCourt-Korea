@@ -166,6 +166,171 @@ a { color: var(--clay-coral); text-decoration: none; }
   color: var(--ink-muted);
 }
 
+/* Mode tabs */
+.mode-tabs {
+  display: inline-flex;
+  gap: 4px;
+  background: rgba(255,255,255,0.6);
+  padding: 4px;
+  border-radius: var(--r-pill);
+  margin-top: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.mode-tab {
+  border: none;
+  background: transparent;
+  padding: 10px 20px;
+  border-radius: var(--r-pill);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.mode-tab-active {
+  background: var(--clay-coral);
+  color: white;
+}
+.mode-tab:hover:not(.mode-tab-active) {
+  background: white;
+}
+
+/* Bench progress */
+.bench-card {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 28px;
+  box-shadow: var(--shadow);
+}
+.bench-card.error { border-color: var(--clay-coral); color: var(--clay-coral); }
+.bench-progress {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.bench-step {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border-radius: var(--r);
+  background: var(--bg-soft);
+  transition: all 0.3s;
+}
+.bench-step.active {
+  background: rgba(251,194,82,0.18);
+  box-shadow: 0 0 0 2px var(--clay-orange);
+}
+.bench-step.done {
+  background: rgba(78,205,196,0.18);
+  opacity: 0.85;
+}
+.bench-step-num {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--ink-muted);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.bench-step.active .bench-step-num { background: var(--clay-orange); }
+.bench-step.done .bench-step-num { background: #4ECDC4; }
+.bench-step-label { font-weight: 700; font-size: 13px; color: var(--ink); }
+.bench-step-desc { font-size: 11px; color: var(--ink-muted); }
+.bench-msg {
+  background: rgba(251,194,82,0.15);
+  border-radius: var(--r);
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #B8731F;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.bench-section { margin-top: 24px; }
+.bench-section-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0 0 14px;
+}
+
+/* Chat bubbles */
+.chat-row { display: flex; margin-bottom: 12px; }
+.chat-row-pros { justify-content: flex-start; }
+.chat-row-def  { justify-content: flex-end; }
+.chat-row-judge { justify-content: center; }
+
+.chat-bubble {
+  max-width: 75%;
+  padding: 14px 18px;
+  border-radius: var(--r-md);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.bubble-coral  { background: rgba(208,58,90,0.08);   border-left: 3px solid var(--clay-coral); }
+.bubble-blue   { background: rgba(137,207,240,0.18); border-right: 3px solid var(--clay-blue); }
+.bubble-purple { background: rgba(155,143,229,0.12); border-left: 3px solid #6B5FE0; max-width: 90%; }
+
+.bubble-head {
+  font-weight: 700;
+  font-size: 12px;
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.bubble-list .bubble-item {
+  font-size: 13px;
+  color: var(--ink-soft);
+  margin-bottom: 4px;
+}
+.bubble-text { font-size: 13px; color: var(--ink-soft); }
+.bubble-quote {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--ink-muted);
+  margin-top: 6px;
+}
+.bubble-counter {
+  font-size: 13px;
+  color: var(--ink);
+  margin-top: 2px;
+  margin-bottom: 8px;
+  padding-left: 8px;
+  border-left: 2px solid var(--clay-orange);
+}
+.bubble-zone {
+  background: white;
+  padding: 8px 14px;
+  border-radius: var(--r-sm);
+  margin-bottom: 8px;
+  font-size: 13.5px;
+  display: inline-block;
+}
+
+.bench-final {
+  background: linear-gradient(135deg, var(--clay-pink), var(--clay-cream));
+  border-radius: var(--r-md);
+  padding: 24px;
+  margin-top: 24px;
+  text-align: center;
+}
+.final-zone { font-size: 18px; font-weight: 700; color: var(--ink); margin-bottom: 8px; }
+.final-range { font-size: 16px; color: var(--clay-coral); font-weight: 700; margin-bottom: 12px; }
+.final-reasoning { font-size: 13px; color: var(--ink-soft); line-height: 1.7; }
+
 /* hero scene — Claybees scene illustration single centered */
 .hero-scene {
   margin: 32px auto 0;

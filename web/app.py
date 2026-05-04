@@ -79,19 +79,69 @@ class BenchRequest(BaseModel):
 
 @app.post("/api/bench")
 async def api_bench(req: BenchRequest):
-    """AgentsBench 4단계 다중 에이전트 양형 시뮬레이션.
-
-    Stage 1: 독립 분석 (검사·변호인·판사 병렬)
-    Stage 2: 토론 (3턴 — 양측 반박 → 판사 종합)
-    Stage 3: 최종 양형 결정
-    Stage 4 (옵션): 양형위원회 7명 합의 분포
-    """
+    """AgentsBench 4단계 다중 에이전트 양형 시뮬레이션 (동기, 30s timeout 가능)."""
     from core.agents_bench import simulate_bench
     return JSONResponse(simulate_bench(
         req.description,
         top_k=req.top_k,
         full_4_stages=req.full_4_stages,
     ))
+
+
+# ─── Async Polling (API GW 30s 한계 우회) ───────────────────────────────
+S3_BUCKET = "aptbaechi-sentencing-frontend"
+S3_JOBS_PREFIX = "jobs/"
+
+
+@app.post("/api/bench-submit")
+async def api_bench_submit(req: BenchRequest):
+    """job_id 즉시 반환 + Lambda async invoke로 background 토론 시작."""
+    import uuid, boto3, json as _json, os as _os
+    job_id = uuid.uuid4().hex[:16]
+
+    # 1. S3에 PENDING 상태 기록
+    s3 = boto3.client("s3")
+    s3.put_object(
+        Bucket=S3_BUCKET,
+        Key=f"{S3_JOBS_PREFIX}{job_id}.json",
+        Body=_json.dumps({"status": "PENDING", "stage": 0}, ensure_ascii=False).encode("utf-8"),
+        ContentType="application/json",
+        CacheControl="no-cache",
+    )
+
+    # 2. 자기 자신 Lambda async invoke (worker mode)
+    fn_name = _os.getenv("AWS_LAMBDA_FUNCTION_NAME", "aptbaechi-sentencing-rag")
+    lam = boto3.client("lambda")
+    lam.invoke(
+        FunctionName=fn_name,
+        InvocationType="Event",  # async
+        Payload=_json.dumps({
+            "_internal_worker": True,
+            "job_id": job_id,
+            "description": req.description,
+            "top_k": req.top_k,
+            "full_4_stages": req.full_4_stages,
+        }).encode("utf-8"),
+    )
+
+    return JSONResponse({"job_id": job_id, "status": "PENDING"})
+
+
+@app.get("/api/bench-result/{job_id}")
+async def api_bench_result(job_id: str):
+    """polling endpoint — S3에서 job 결과 읽기."""
+    import boto3, json as _json
+    if not job_id.isalnum() or len(job_id) > 32:
+        return JSONResponse({"error": "invalid job_id"}, status_code=400)
+    s3 = boto3.client("s3")
+    try:
+        obj = s3.get_object(Bucket=S3_BUCKET, Key=f"{S3_JOBS_PREFIX}{job_id}.json")
+        data = _json.loads(obj["Body"].read())
+        return JSONResponse(data)
+    except s3.exceptions.NoSuchKey:
+        return JSONResponse({"status": "NOT_FOUND"}, status_code=404)
+    except Exception as e:
+        return JSONResponse({"error": str(e)[:200]}, status_code=500)
 
 
 class VerifyRequest(BaseModel):

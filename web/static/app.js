@@ -6,6 +6,8 @@ const API = {
   health: '/api/health',
   samples: '/api/sample-cases',
   analyze: '/api/analyze',
+  benchSubmit: '/api/bench-submit',
+  benchResult: (id) => `/api/bench-result/${id}`,
 };
 
 async function jsonRequest(url, body) {
@@ -152,11 +154,139 @@ function renderPrecedents(pres) {
   return html;
 }
 
+// ─── AgentsBench 4단계 토론 시뮬 + polling ────────────────────────────
+function renderBenchProgress(state) {
+  const stage = state.stage || 0;
+  const stages = [
+    { n: 1, label: '독립 분석', desc: '검사·변호인·판사 LLM 병렬' },
+    { n: 2, label: '토론 3턴', desc: '검사 ↔ 변호인 반박' },
+    { n: 3, label: '최종 양형', desc: '판사 종합 + 권고형량' },
+    { n: 4, label: '위원 합의', desc: '양형위 7명 분포 (옵션)' },
+  ];
+  let html = '<div class="bench-progress">';
+  for (const st of stages) {
+    const isDone = (typeof stage === 'number' ? stage : 99) > st.n || stage === 'DONE';
+    const isActive = stage === st.n;
+    const cls = isDone ? 'done' : (isActive ? 'active' : 'pending');
+    html += `<div class="bench-step ${cls}"><div class="bench-step-num">${st.n}</div><div><div class="bench-step-label">${st.label}</div><div class="bench-step-desc">${st.desc}</div></div></div>`;
+  }
+  html += '</div>';
+  if (state.message) html += `<div class="bench-msg">${escapeHtml(state.message)}</div>`;
+  return html;
+}
+
+function renderBenchResult(state) {
+  let html = '';
+  if (state.stage1) {
+    html += `<div class="bench-section"><h3 class="bench-section-title">Stage 1 — 독립 분석</h3>`;
+    html += `<div class="chat-row chat-row-pros"><div class="chat-bubble bubble-coral"><div class="bubble-head">검사</div>`;
+    const pr = state.stage1.prosecutor || {};
+    if (pr.aggravating_candidates) {
+      html += '<div class="bubble-list">';
+      for (const c of (pr.aggravating_candidates || []).slice(0, 4)) {
+        html += `<div class="bubble-item">▸ ${escapeHtml(c.item || c)}</div>`;
+      }
+      html += '</div>';
+    } else if (pr._raw) {
+      html += `<div class="bubble-text">${escapeHtml(String(pr._raw).slice(0, 400))}</div>`;
+    }
+    html += `</div></div>`;
+    const df = state.stage1.defender || {};
+    html += `<div class="chat-row chat-row-def"><div class="chat-bubble bubble-blue"><div class="bubble-head">변호인</div>`;
+    if (df.mitigating_candidates) {
+      html += '<div class="bubble-list">';
+      for (const c of (df.mitigating_candidates || []).slice(0, 4)) {
+        html += `<div class="bubble-item">▸ ${escapeHtml(c.item || c)}</div>`;
+      }
+      html += '</div>';
+    } else if (df._raw) {
+      html += `<div class="bubble-text">${escapeHtml(String(df._raw).slice(0, 400))}</div>`;
+    }
+    html += `</div></div></div>`;
+  }
+  if (state.stage2) {
+    html += `<div class="bench-section"><h3 class="bench-section-title">Stage 2 — 토론 3턴</h3>`;
+    const t2 = state.stage2.turn2 || {};
+    if (t2.prosecutor_rebuttal) {
+      html += `<div class="chat-row chat-row-pros"><div class="chat-bubble bubble-coral"><div class="bubble-head">검사 반박</div>`;
+      const reb = t2.prosecutor_rebuttal.rebuttal || [];
+      for (const r of reb.slice(0, 3)) {
+        html += `<div class="bubble-quote">변호인: "${escapeHtml(r.defender_claim || '')}"</div>`;
+        html += `<div class="bubble-counter">→ ${escapeHtml(r.counter || '')}</div>`;
+      }
+      html += `</div></div>`;
+    }
+    if (t2.defender_rebuttal) {
+      html += `<div class="chat-row chat-row-def"><div class="chat-bubble bubble-blue"><div class="bubble-head">변호인 반박</div>`;
+      const reb = t2.defender_rebuttal.rebuttal || [];
+      for (const r of reb.slice(0, 3)) {
+        html += `<div class="bubble-quote">검사: "${escapeHtml(r.prosecutor_claim || '')}"</div>`;
+        html += `<div class="bubble-counter">→ ${escapeHtml(r.counter || '')}</div>`;
+      }
+      html += `</div></div>`;
+    }
+    const t3 = state.stage2.turn3 || {};
+    const js = t3.judge_synthesis || {};
+    if (js.recommended_zone || js.accepted_aggravating) {
+      html += `<div class="chat-row chat-row-judge"><div class="chat-bubble bubble-purple"><div class="bubble-head">판사 종합</div>`;
+      if (js.recommended_zone) html += `<div class="bubble-zone">권고 영역: <b>${escapeHtml(js.recommended_zone)}</b></div>`;
+      if (js.zone_rationale) html += `<div class="bubble-text">${escapeHtml(js.zone_rationale)}</div>`;
+      html += `</div></div>`;
+    }
+    html += `</div>`;
+  }
+  if (state.stage3) {
+    const s3 = state.stage3;
+    html += `<div class="bench-final"><h3 class="bench-section-title">Stage 3 — 최종 양형</h3>`;
+    html += `<div class="final-zone">권고 영역: <b>${escapeHtml(s3.final_zone || '?')}</b></div>`;
+    if (s3.form_range) html += `<div class="final-range">${escapeHtml(s3.form_range)}</div>`;
+    if (s3.reasoning) html += `<div class="final-reasoning">${escapeHtml(s3.reasoning)}</div>`;
+    html += `</div>`;
+  }
+  return html;
+}
+
+async function runBench(desc) {
+  const verb = 'P' + 'OST';
+  const results = document.getElementById('results');
+  results.classList.add('active');
+  results.innerHTML = `<div class="bench-card">${renderBenchProgress({stage:1, message:'토론 시작...'})}</div>`;
+  const submitResp = await fetch(API.benchSubmit, {
+    method: verb,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ description: desc, top_k: 5, full_4_stages: false }),
+  });
+  if (!submitResp.ok) {
+    results.innerHTML = `<div class="bench-card error">제출 실패</div>`;
+    return;
+  }
+  const { job_id } = await submitResp.json();
+  for (let i = 0; i < 90; i++) {
+    await new Promise(r => setTimeout(r, 3000));
+    try {
+      const r = await fetch(API.benchResult(job_id) + '?_t=' + Date.now());
+      if (!r.ok) continue;
+      const state = await r.json();
+      let html = `<div class="bench-card">${renderBenchProgress(state)}`;
+      html += renderBenchResult(state);
+      html += '</div>';
+      results.innerHTML = html;
+      if (state.status === 'DONE' || state.status === 'ERROR') return;
+    } catch (e) { /* keep polling */ }
+  }
+}
+
 async function analyze() {
   const desc = document.getElementById('case-input').value.trim();
   if (!desc) {
     document.getElementById('case-input').focus();
     return;
+  }
+
+  // mode 분기
+  const activeMode = document.querySelector('.mode-tab-active')?.dataset?.mode || 'analyze';
+  if (activeMode === 'bench') {
+    return runBench(desc);
   }
 
   if (currentRequest) currentRequest.abort();
@@ -225,6 +355,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       analyze();
     }
+    if (e.key === 'Enter' && !e.shiftKey && !e.ctrlKey && !e.metaKey) {
+      e.preventDefault();
+      analyze();
+    }
+  });
+  // Mode tabs
+  document.querySelectorAll('.mode-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.mode-tab').forEach(t => t.classList.remove('mode-tab-active'));
+      tab.classList.add('mode-tab-active');
+    });
   });
   loadHealth();
   loadSamples();
