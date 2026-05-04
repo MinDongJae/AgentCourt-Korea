@@ -44,3 +44,6 @@ _gabia_work/
 mcp_law_external/
 *_result.txt
 *_backup*
+
+# Chromakey raw cache (체크무늬 박힌 원본)
+docs/assets/_chromakey/
